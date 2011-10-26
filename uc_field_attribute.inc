@@ -122,6 +122,9 @@ function _uc_field_attribute_node_delete($node) {
     db_delete('uc_field_attribute_options')
       ->condition('aid', $row->aid)
       ->execute();
+    db_delete('uc_attributes')
+      ->condition('aid', $row->aid)
+      ->execute();
   }
   db_delete('uc_field_attribute_node')
     ->condition('nid', $node->nid)
