@@ -114,13 +114,13 @@ function _uc_field_attribute_node_delete($node) {
   $result = db_query("SELECT aid FROM {uc_field_attribute_node}
     WHERE nid = :nid",
     array(':nid' => $node->nid));
-  foreach($result as $aid) {
+  foreach($result as $row) {
 //     $options = uc_field_attribute_options_load($aid);
     db_delete('uc_attribute_options')
-      ->condition('aid', $aid)
+      ->condition('aid', $row->aid)
       ->execute();
     db_delete('uc_field_attribute_options')
-      ->condition('aid', $aid)
+      ->condition('aid', $row->aid)
       ->execute();
   }
   db_delete('uc_field_attribute_node')
