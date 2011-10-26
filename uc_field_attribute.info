@@ -1,0 +1,7 @@
+name = UC Field attributes
+core = 7.x
+dependencies[] = uc_product
+dependencies[] = uc_order
+dependencies[] = uc_attribute
+package = "Ubercart - extra"
+
