@@ -76,4 +76,5 @@ function uc_field_attribute_schema() {
       'aid' => array('aid'), ///TODO
     ),
   );
+  return $schema;
 }
