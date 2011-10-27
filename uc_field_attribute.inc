@@ -50,12 +50,14 @@ function _uc_field_attribute_nodeapi($node, $mode = NULL) {
     $product_attribute = $attribute;
     $attributes = uc_product_get_attributes($node->nid);
     // UPDATE or INSERT
-    $is_new = isset($attributes[$product_attribute->aid]);
-    $primary_keys = ($is_new ? array('aid', 'nid') : NULL);
+    $exists = isset($attributes[$product_attribute->aid]);
+//     $primary_keys = ($is_new ? NULL : array('aid', 'nid'));
     $product_attribute->nid = $node->nid;
-    /// TODO do we always update
+    /// TODO do we always update -- could be a setting
     /// NOTE no API for this?
-    drupal_write_record('uc_product_attributes', $product_attribute, $primary_keys);
+    if (!$exists) {
+      drupal_write_record('uc_product_attributes', $product_attribute, NULL);
+    }
     $product_options = uc_field_attribute_options_load($product_attribute->aid);
 
     $items = field_get_items('node', $node, $field_name);
