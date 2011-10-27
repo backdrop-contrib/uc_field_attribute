@@ -35,19 +35,17 @@ function _uc_field_attribute_nodeapi($node, $mode = NULL) {
       $attribute = $instance;
       $attribute->display = 1;
       $attribute->name = $instance->field_name;
-      if (!uc_attribute_save($attribute)) {
-        return; ///TODO
-      }
+      uc_attribute_save($attribute);
+      $attribute = (object) $attribute;
       $field_attribute = array(
         "aid" => $attribute->aid,
         "nid" => $node->nid,
         "field_instance_id" => $instance->id,
       );
-      if (!uc_field_attribute_save($field_attribute)) {
-        return; ///TODO
-      }
+      drupal_write_record('uc_field_attribute_node', $field_attribute);
+      $attribute = (object) $field_attribute;
     }
-    $product_attribute = $attribute;
+    $product_attribute = (object) $attribute;
     $attributes = uc_product_get_attributes($node->nid);
     // UPDATE or INSERT
     $exists = isset($attributes[$product_attribute->aid]);
@@ -56,7 +54,8 @@ function _uc_field_attribute_nodeapi($node, $mode = NULL) {
     /// TODO do we always update -- could be a setting
     /// NOTE no API for this?
     if (!$exists) {
-      drupal_write_record('uc_product_attributes', $product_attribute, NULL);
+      drupal_write_record('uc_product_attributes', $product_attribute);
+      $product_attribute = (object) $product_attribute;
     }
     $product_options = uc_field_attribute_options_load($product_attribute->aid);
 
@@ -83,16 +82,11 @@ function _uc_field_attribute_nodeapi($node, $mode = NULL) {
           'ordering' => $index,
         );
         $option = (object) $option;
-        if (!uc_attribute_option_save($option)) {
-          return; ///TODO
-        }
+        uc_attribute_option_save($option);
+        $option = (object) $option;
         $option->nid = $node->nid;
-        if (!drupal_write_record('uc_product_options', $option)) {
-          return; ///TODO
-        }
-        if (!drupal_write_record('uc_field_attribute_options', $option)) {
-          return; ///TODO
-        }
+        drupal_write_record('uc_product_options', $option);
+        drupal_write_record('uc_field_attribute_options', $option);
       }
     }
     //at this point $product_attribute->options holds all options that have "disappeared"
