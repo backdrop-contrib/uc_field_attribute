@@ -32,7 +32,6 @@ function uc_field_attribute_node_insert($node) {
   if (!array_key_exists($node->type, uc_product_class_load())) {
     return;
   }
-
   require_once('uc_field_attribute.inc');
   return _uc_field_attribute_nodeapi($node, "insert");
 }
@@ -46,6 +45,9 @@ function uc_field_attribute_node_update($node) {
 }
 
 function uc_field_attribute_node_delete($node) {
+  if (!array_key_exists($node->type, uc_product_class_load())) {
+    return;
+  }
   require_once('uc_field_attribute.inc');
   return _uc_field_attribute_node_delete($node);
 }
