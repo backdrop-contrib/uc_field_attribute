@@ -32,6 +32,7 @@ function _uc_field_attribute_nodeapi($node, $mode = NULL) {
     $instance = (object) $instance;
     $attribute = uc_field_attribute_load($node->nid, $instance->id);
     if (!$attribute) {
+//       dsm($instance);
       $attribute = $instance;
       $attribute->display = 1;
       $attribute->name = $instance->field_name;
@@ -43,15 +44,15 @@ function _uc_field_attribute_nodeapi($node, $mode = NULL) {
         "field_instance_id" => $instance->id,
       );
       drupal_write_record('uc_field_attribute_node', $field_attribute);
-      $attribute = (object) $field_attribute;
+//       $attribute = (object) $field_attribute;
     }
     $product_attribute = (object) $attribute;
+//     dsm($product_attribute);
     $attributes = uc_product_get_attributes($node->nid);
     // UPDATE or INSERT
     $exists = isset($attributes[$product_attribute->aid]);
 //     $primary_keys = ($is_new ? NULL : array('aid', 'nid'));
     $product_attribute->nid = $node->nid;
-    /// TODO do we always update -- could be a setting
     /// NOTE no API for this?
     if (!$exists) {
       drupal_write_record('uc_product_attributes', $product_attribute);
