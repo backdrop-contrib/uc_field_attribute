@@ -32,7 +32,7 @@ function uc_field_attribute_node_insert($node) {
   if (!array_key_exists($node->type, uc_product_class_load())) {
     return;
   }
-  require_once('uc_field_attribute.inc');
+  module_load_include('inc', 'uc_field_attribute', 'uc_field_attribute');
   return _uc_field_attribute_nodeapi($node, "insert");
 }
 
@@ -40,7 +40,7 @@ function uc_field_attribute_node_update($node) {
   if (!array_key_exists($node->type, uc_product_class_load())) {
     return;
   }
-  require_once('uc_field_attribute.inc');
+  module_load_include('inc', 'uc_field_attribute', 'uc_field_attribute');
   return _uc_field_attribute_nodeapi($node, "update");
 }
 
@@ -48,6 +48,6 @@ function uc_field_attribute_node_delete($node) {
   if (!array_key_exists($node->type, uc_product_class_load())) {
     return;
   }
-  require_once('uc_field_attribute.inc');
+  module_load_include('inc', 'uc_field_attribute', 'uc_field_attribute');
   return _uc_field_attribute_node_delete($node);
 }
