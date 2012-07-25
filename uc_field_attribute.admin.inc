@@ -44,7 +44,7 @@ function uc_field_attribute_form($form, &$form_state, $object, $type, $view = 'o
     '#header' => $header,
     '#options' => $options,
     '#empty' => t("There are no fields available for this content type. Add fields to the content type first and then enable them here."),
-    '#default_value' => (array) $attribute_settings->fields,
+    '#default_value' => (isset($attribute_settings->fields) ? (array) $attribute_settings->fields : array()),
   );
 
   $form['submit'] = array(

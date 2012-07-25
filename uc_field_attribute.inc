@@ -15,10 +15,8 @@ function _uc_field_attribute_nodeapi($node, $mode = NULL) {
     if (!$enabled) {
       continue;
     }
-    if (!$bundle) {
-      $bundle = field_extract_bundle('node', $node);
-      $instances = field_info_instances('node', $bundle);
-    }
+    $bundle = field_extract_bundle('node', $node);
+    $instances = field_info_instances('node', $bundle);
     $found = false;
     foreach($instances as $field_name => $instance) {
       if ($instance['id'] == $fiid) {
@@ -36,6 +34,7 @@ function _uc_field_attribute_nodeapi($node, $mode = NULL) {
       $attribute = $instance;
       $attribute->display = 1;
       $attribute->name = $instance->field_name;
+      $attribute->options = array();
       uc_attribute_save($attribute);
       $attribute = (object) $attribute;
       $field_attribute = array(
