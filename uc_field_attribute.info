@@ -1,5 +1,6 @@
 name = UC Field attributes
-core = 7.x
+backdrop = 1.x
+type = module
 dependencies[] = uc_product
 dependencies[] = uc_order
 dependencies[] = uc_attribute

@@ -2,35 +2,35 @@
 /**
  * @file uc_field_attribute.inc
  * Node functions for uc_field_attribute
- *
- * (C)2011 Michael Moritz miiimooo/at/drupal.org http://drupal.org/user/62954
  */
 
+/**
+ * Helper: act on a node operation.
+ */
 function _uc_field_attribute_nodeapi($node, $mode = NULL) {
   if (!array_key_exists($node->type, uc_product_class_load())) {
     return;
   }
   $attribute_settings = uc_field_attribute_load_settings($node->type);
-  foreach($attribute_settings->fields as $fiid => $enabled) {
+  foreach ($attribute_settings->fields as $fiid => $enabled) {
     if (!$enabled) {
       continue;
     }
     $bundle = field_extract_bundle('node', $node);
     $instances = field_info_instances('node', $bundle);
     $found = false;
-    foreach($instances as $field_name => $instance) {
-      if ($instance['id'] == $fiid) {
+    foreach ($instances as $field_name => $instance) {
+      if ($field_name == $fiid) {
         $found = true;
         break;
       }
     }
     if (!$found) {
-      continue; //TODO warning?
+      continue; // @todo warning?
     }
     $instance = (object) $instance;
-    $attribute = uc_field_attribute_load($node->nid, $instance->id);
+    $attribute = uc_field_attribute_load($node->nid, $instance->field_name);
     if (!$attribute) {
-//       dsm($instance);
       $attribute = $instance;
       $attribute->display = 1;
       $attribute->name = $instance->field_name;
@@ -40,34 +40,31 @@ function _uc_field_attribute_nodeapi($node, $mode = NULL) {
       $field_attribute = array(
         "aid" => $attribute->aid,
         "nid" => $node->nid,
-        "field_instance_id" => $instance->id,
+        "field_instance_id" => $instance->field_name,
       );
-      drupal_write_record('uc_field_attribute_node', $field_attribute);
-//       $attribute = (object) $field_attribute;
+      backdrop_write_record('uc_field_attribute_node', $field_attribute);
     }
     $product_attribute = (object) $attribute;
-//     dsm($product_attribute);
     $attributes = uc_product_get_attributes($node->nid);
     // UPDATE or INSERT
     $exists = isset($attributes[$product_attribute->aid]);
-//     $primary_keys = ($is_new ? NULL : array('aid', 'nid'));
     $product_attribute->nid = $node->nid;
-    /// NOTE no API for this?
+    // @todo no API for this?
     if (!$exists) {
-      drupal_write_record('uc_product_attributes', $product_attribute);
+      backdrop_write_record('uc_product_attributes', $product_attribute);
       $product_attribute = (object) $product_attribute;
     }
     $product_options = uc_field_attribute_options_load($product_attribute->aid);
 
     $items = field_get_items('node', $node, $field_name);
 
-    foreach($items as $index => $item) {
-      // this returns markup in an array
-      // could probably make the $display configurable
+    foreach ($items as $index => $item) {
+      // This returns markup in an array.
+      // Could probably make the $display configurable.
       $value = field_view_value('node', $node, $field_name, $item);
       $value = strip_tags($value['#markup']);
       $product_attribute_oid = 0;
-      foreach($product_attribute->options as $oid => $option) {
+      foreach ($product_attribute->options as $oid => $option) {
         if ($option->name == $value) {
           $product_attribute_oid = $oid;
           unset($product_attribute->options[$oid]);
@@ -75,7 +72,8 @@ function _uc_field_attribute_nodeapi($node, $mode = NULL) {
         }
       }
       if (!$product_attribute_oid) {
-        ///TODO could this already exist - should probably check through the table first
+        // @todo could this already exist - should probably check through the
+        // table first
         $option = array(
           "aid" => $product_attribute->aid,
           'name' => $value,
@@ -85,13 +83,13 @@ function _uc_field_attribute_nodeapi($node, $mode = NULL) {
         uc_attribute_option_save($option);
         $option = (object) $option;
         $option->nid = $node->nid;
-        drupal_write_record('uc_product_options', $option);
-        drupal_write_record('uc_field_attribute_options', $option);
+        backdrop_write_record('uc_product_options', $option);
+        backdrop_write_record('uc_field_attribute_options', $option);
       }
     }
-    //at this point $product_attribute->options holds all options that have "disappeared"
-    //from the Field API field
-    foreach($product_attribute->options as $oid => $option) {
+    // At this point $product_attribute->options holds all options that have
+    // "disappeared" from the Field API field.
+    foreach ($product_attribute->options as $oid => $option) {
       db_delete('uc_product_options')
         ->condition('oid', $oid)
         ->condition('nid', $node->nid)
@@ -106,12 +104,17 @@ function _uc_field_attribute_nodeapi($node, $mode = NULL) {
     }
   }
 }
+
+/**
+ * Helper function to delete attributes when a node is deleted.
+ *
+ * @param Node $node
+ */
 function _uc_field_attribute_node_delete($node) {
   $result = db_query("SELECT aid FROM {uc_field_attribute_node}
     WHERE nid = :nid",
     array(':nid' => $node->nid));
-  foreach($result as $row) {
-//     $options = uc_field_attribute_options_load($aid);
+  foreach ($result as $row) {
     db_delete('uc_attribute_options')
       ->condition('aid', $row->aid)
       ->execute();
@@ -126,6 +129,13 @@ function _uc_field_attribute_node_delete($node) {
     ->condition('nid', $node->nid)
     ->execute();
 }
+/**
+ * Options load
+ *
+ * @param int $aid
+ *
+ * @return array
+ */
 function uc_field_attribute_options_load($aid) {
   $options = array();
 
@@ -137,11 +147,27 @@ function uc_field_attribute_options_load($aid) {
   return $options;
 
 }
+/**
+ * Save attribute
+ *
+ * @param object $attribute
+ *   By reference
+ *
+ * @return bool
+ */
 function uc_field_attribute_save(&$attribute) {
   // Insert or update?
   $key = empty($attribute->aid) ? array() : 'aid';
-  return drupal_write_record('uc_field_attribute_node', $attribute, $key);
+  return backdrop_write_record('uc_field_attribute_node', $attribute, $key);
 }
+
+/**
+ * Load the attribute
+ *
+ * @param int $nid
+ * @param int $fiid
+ *   Field isntance
+ */
 function uc_field_attribute_load($nid, $fiid) {
   $aid = db_query("SELECT aid FROM {uc_field_attribute_node}
     WHERE nid = :nid AND field_instance_id = :fid",
@@ -150,10 +176,4 @@ function uc_field_attribute_load($nid, $fiid) {
     return false;
   }
   return uc_attribute_load($aid);
-//   $aid = db_select('')
-// //     ->fields('aid')
-//     ->condition('nid', $nid)
-//     ->condition('field_id', $fid)
-//     ->execute();
-
 }

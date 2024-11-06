@@ -3,8 +3,6 @@
 /**
  * @file uc_field_attributes_for
  * Field Attribute administration menu items.
- *
- * (C)2011 Michael Moritz miiimooo/at/drupal.org http://drupal.org/user/62954
  */
 
 /**
@@ -16,30 +14,30 @@ function uc_field_attribute_form($form, &$form_state, $object, $type, $view = 'o
   $class = $object;
   $id = $class->pcid;
   if (empty($class->name)) {
-    drupal_goto('admin/store/products/classes/' . $id);
+    backdrop_goto('admin/store/products/classes/' . $id);
   }
-  drupal_set_title($class->name);
+  backdrop_set_title($class->name);
 
   $instances = field_info_instances('node', $class->pcid);
 
   $header = array(
     "label" => t("Field name"),
   );
-  
+
   $form = array(
     array('#markup' => t("Select the fields to make available as product attributes."))
   );
-  
+
   $form['#tree'] = TRUE;
   $options = array();
-  foreach($instances as $field_name => $instance) {
-    $options[$instance['id']] = array(
+  foreach ($instances as $field_name => $instance) {
+    $options[$field_name] = array(
       "label" => check_plain($instance['label']),
     );
-    
+
   }
   $attribute_settings = uc_field_attribute_load_settings($class->pcid);
-  $form['fields'] = array (
+  $form['fields'] = array(
     '#type' => 'tableselect',
     '#header' => $header,
     '#options' => $options,
@@ -65,5 +63,5 @@ function uc_field_attribute_form_submit($form, &$form_state) {
     'fields' =>  $form_state['values']['fields'],
   );
   uc_field_attribute_save_settings(arg(4), $settings);
-  drupal_set_message(t("The changes have been saved."));
+  backdrop_set_message(t("The changes have been saved."));
 }
