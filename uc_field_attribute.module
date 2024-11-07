@@ -63,3 +63,52 @@ function uc_field_attribute_node_delete($node) {
   module_load_include('inc', 'uc_field_attribute', 'uc_field_attribute');
   return _uc_field_attribute_node_delete($node);
 }
+
+/**
+ * Save settings.
+ */
+function uc_field_attribute_save_settings($bundle_name, $settings) {
+  config_set('uc_field_attribute.settings', "uc_field_attribute_$bundle_name", (array) $settings);
+  _uc_field_attribute_setting_delete($bundle_name, $settings);
+}
+
+/**
+ * Delete attributes from node when a field attribute is deleted from bundle.
+ *
+ * @param string $bundle_name
+ * @param array $settings
+ */
+function _uc_field_attribute_setting_delete($bundle_name, $settings) {
+  module_load_include('inc', 'uc_field_attribute', 'uc_field_attribute');
+  foreach ($settings['fields'] as $field => $enabled) {
+    if ($enabled) {
+      continue;
+    }
+
+    $result = db_select('uc_field_attribute_node', 'n')
+      ->fields('n', array('aid', 'nid'))
+      ->condition('n.field_instance_id', $field)
+      ->execute();
+    foreach ($result as $item) {
+      $node = node_load($item->nid);
+      if ($node->type == $bundle_name) {
+        db_delete('uc_attribute_options')
+          ->condition('aid', $item->aid)
+          ->execute();
+        db_delete('uc_field_attribute_options')
+          ->condition('aid', $item->aid)
+          ->execute();
+        db_delete('uc_attributes')
+          ->condition('aid', $item->aid)
+          ->execute();
+        db_delete('uc_field_attribute_node')
+          ->condition('aid', $item->aid)
+          ->execute();
+        db_delete('uc_product_attributes')
+          ->condition('aid', $item->aid)
+          ->condition('nid', $item->nid)
+          ->execute();
+      }
+    }
+  }
+}

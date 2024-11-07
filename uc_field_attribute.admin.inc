@@ -77,6 +77,6 @@ function uc_field_attribute_form_submit($form, &$form_state) {
     'fields' =>  $form_state['values']['fields'],
   );
   $bundle_name = arg(4);
-  config_set('uc_field_attribute.settings', "uc_field_attribute_$bundle_name", (array) $settings);
+  uc_field_attribute_save_settings($bundle_name, $settings);
   backdrop_set_message(t('The changes have been saved.'));
 }

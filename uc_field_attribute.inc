@@ -146,6 +146,7 @@ function _uc_field_attribute_node_delete($node) {
     ->condition('nid', $node->nid)
     ->execute();
 }
+
 /**
  * Options load
  *
@@ -165,6 +166,7 @@ function uc_field_attribute_options_load($aid) {
   return $options;
 
 }
+
 /**
  * Save attribute
  *
