@@ -127,9 +127,10 @@ function _uc_field_attribute_sync($node) {
  * @param Node $node
  */
 function _uc_field_attribute_node_delete($node) {
-  $result = db_query('SELECT aid FROM {uc_field_attribute_node}
-    WHERE nid = :nid',
-    array(':nid' => $node->nid));
+  $result = db_select('uc_field_attribute_node', 'n')
+    ->fields('n', array('aid'))
+    ->condition('n.nid', $node->nid)
+    ->execute();
   foreach ($result as $row) {
     db_delete('uc_attribute_options')
       ->condition('aid', $row->aid)
@@ -155,8 +156,9 @@ function _uc_field_attribute_node_delete($node) {
 function uc_field_attribute_options_load($aid) {
   $options = array();
 
-  $result = db_query('SELECT * FROM {uc_field_attribute_options}
-    WHERE aid = :aid', array(':aid' => $aid));
+  $result = db_select('uc_field_attribute_options', 'o')
+    ->condition('o.aid', $aid)
+    ->execute();
   foreach ($result as $option) {
     $options[$option->oid] = $option;
   }
@@ -184,9 +186,12 @@ function uc_field_attribute_save($attribute) {
  *   Field instance
  */
 function uc_field_attribute_load($nid, $fiid) {
-  $aid = db_query('SELECT aid FROM {uc_field_attribute_node}
-    WHERE nid = :nid AND field_instance_id = :fid',
-    array(':nid' => $nid, ':fid' => $fiid))->fetchField();
+  $aid = db_select('uc_field_attribute_node', 'n')
+    ->fields('n', array('aid'))
+    ->condition('n.nid', $nid)
+    ->condition('field_instance_id', $fiid)
+    ->execute()
+    ->fetchField();
   if (!$aid) {
     return false;
   }
