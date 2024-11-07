@@ -14,6 +14,9 @@ function _uc_field_attribute_sync($node) {
     return;
   }
   $attribute_settings = (object) config_get('uc_field_attribute.settings', "uc_field_attribute_{$node->type}");
+  if (!$attribute_settings) {
+    return;
+  }
   foreach ($attribute_settings->fields as $fiid => $enabled) {
     if (!$enabled) {
       continue;
