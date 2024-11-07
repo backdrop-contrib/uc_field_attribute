@@ -21,27 +21,41 @@ function uc_field_attribute_form($form, &$form_state, $object, $type, $view = 'o
   $instances = field_info_instances('node', $class->pcid);
 
   $header = array(
-    "label" => t("Field name"),
+    'label' => t('Field name'),
+    'operations' => t('Operations'),
   );
 
   $form = array(
-    array('#markup' => t("Select the fields to make available as product attributes."))
+    array('#markup' => t('Select the fields to make available as product attributes.'))
   );
 
   $form['#tree'] = TRUE;
   $options = array();
   foreach ($instances as $field_name => $instance) {
+    $field_name = $instance['field_name'];
+    $links = array(
+      'edit' => array(
+        'title' => t('Edit'),
+        'href' => 'admin/structure/types/manage/' . str_replace('_', '-', $id) . '/fields/' . $field_name,
+      ),
+    );
     $options[$field_name] = array(
-      "label" => check_plain($instance['label']),
+      'label' => check_plain($instance['label']),
+      'operations' => array(
+        'data' => array(
+          '#type' => 'operations',
+          '#links' => $links,
+        ),
+      ),
     );
 
   }
-  $attribute_settings = uc_field_attribute_load_settings($class->pcid);
+  $attribute_settings = (object) config_get('uc_field_attribute.settings', "uc_field_attribute_{$class->pcid}");
   $form['fields'] = array(
     '#type' => 'tableselect',
     '#header' => $header,
     '#options' => $options,
-    '#empty' => t("There are no fields available for this content type. Add fields to the content type first and then enable them here."),
+    '#empty' => t('There are no fields available for this content type. Add fields to the content type first and then enable them here.'),
     '#default_value' => (isset($attribute_settings->fields) ? (array) $attribute_settings->fields : array()),
   );
 
@@ -62,6 +76,7 @@ function uc_field_attribute_form_submit($form, &$form_state) {
   $settings = array(
     'fields' =>  $form_state['values']['fields'],
   );
-  uc_field_attribute_save_settings(arg(4), $settings);
-  backdrop_set_message(t("The changes have been saved."));
+  $bundle_name = arg(4);
+  config_set('uc_field_attribute.settings', "uc_field_attribute_$bundle_name", (array) $settings);
+  backdrop_set_message(t('The changes have been saved.'));
 }

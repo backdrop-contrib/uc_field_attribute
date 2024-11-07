@@ -1,7 +1,7 @@
 <?php
 /**
  * @file uc_field_attribute.module
- * Ubercart attributes an options based on Backdrop core fields
+ * Ubercart attributes and options based on Backdrop core fields
  */
 
 /**
@@ -32,28 +32,6 @@ function uc_field_attribute_config_info() {
 }
 
 /**
- * Load settings
- *
- * @param string $bundle_name
- *
- * @return object
- */
-function uc_field_attribute_load_settings($bundle_name) {
-  $settings = config_get('uc_field_attribute.settings', "uc_field_attribute_$bundle_name");
-  return (object) $settings;
-}
-
-/**
- * Save settings
- *
- * @param string $bundle_name
- * @param array $settings
- */
-function uc_field_attribute_save_settings($bundle_name, $settings) {
-  config_set('uc_field_attribute.settings', "uc_field_attribute_$bundle_name", (array) $settings);
-}
-
-/**
  * Implements hook_node_insert().
  */
 function uc_field_attribute_node_insert($node) {
@@ -61,7 +39,7 @@ function uc_field_attribute_node_insert($node) {
     return;
   }
   module_load_include('inc', 'uc_field_attribute', 'uc_field_attribute');
-  return _uc_field_attribute_nodeapi($node, "insert");
+  return _uc_field_attribute_sync($node, 'insert');
 }
 
 /**
@@ -72,7 +50,7 @@ function uc_field_attribute_node_update($node) {
     return;
   }
   module_load_include('inc', 'uc_field_attribute', 'uc_field_attribute');
-  return _uc_field_attribute_nodeapi($node, "update");
+  return _uc_field_attribute_sync($node, 'update');
 }
 
 /**

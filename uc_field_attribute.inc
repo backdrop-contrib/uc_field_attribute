@@ -5,13 +5,15 @@
  */
 
 /**
- * Helper: act on a node operation.
+ * Sync attributes between attributes and field attributes
+ *
+ * @param Node $node
  */
-function _uc_field_attribute_nodeapi($node, $mode = NULL) {
+function _uc_field_attribute_sync($node) {
   if (!array_key_exists($node->type, uc_product_class_load())) {
     return;
   }
-  $attribute_settings = uc_field_attribute_load_settings($node->type);
+  $attribute_settings = (object) config_get('uc_field_attribute.settings', "uc_field_attribute_{$node->type}");
   foreach ($attribute_settings->fields as $fiid => $enabled) {
     if (!$enabled) {
       continue;
@@ -38,9 +40,9 @@ function _uc_field_attribute_nodeapi($node, $mode = NULL) {
       uc_attribute_save($attribute);
       $attribute = (object) $attribute;
       $field_attribute = array(
-        "aid" => $attribute->aid,
-        "nid" => $node->nid,
-        "field_instance_id" => $instance->field_name,
+        'aid' => $attribute->aid,
+        'nid' => $node->nid,
+        'field_instance_id' => $instance->field_name,
       );
       backdrop_write_record('uc_field_attribute_node', $field_attribute);
     }
@@ -54,7 +56,6 @@ function _uc_field_attribute_nodeapi($node, $mode = NULL) {
       backdrop_write_record('uc_product_attributes', $product_attribute);
       $product_attribute = (object) $product_attribute;
     }
-    $product_options = uc_field_attribute_options_load($product_attribute->aid);
 
     $items = field_get_items('node', $node, $field_name);
 
@@ -75,7 +76,7 @@ function _uc_field_attribute_nodeapi($node, $mode = NULL) {
         // @todo could this already exist - should probably check through the
         // table first
         $option = array(
-          "aid" => $product_attribute->aid,
+          'aid' => $product_attribute->aid,
           'name' => $value,
           'ordering' => $index,
         );
@@ -106,13 +107,13 @@ function _uc_field_attribute_nodeapi($node, $mode = NULL) {
 }
 
 /**
- * Helper function to delete attributes when a node is deleted.
+ * Delete attributes when a node is deleted.
  *
  * @param Node $node
  */
 function _uc_field_attribute_node_delete($node) {
-  $result = db_query("SELECT aid FROM {uc_field_attribute_node}
-    WHERE nid = :nid",
+  $result = db_query('SELECT aid FROM {uc_field_attribute_node}
+    WHERE nid = :nid',
     array(':nid' => $node->nid));
   foreach ($result as $row) {
     db_delete('uc_attribute_options')
@@ -139,8 +140,8 @@ function _uc_field_attribute_node_delete($node) {
 function uc_field_attribute_options_load($aid) {
   $options = array();
 
-  $result = db_query("SELECT * FROM {uc_field_attribute_options}
-    WHERE aid = :aid", array(':aid' => $aid));
+  $result = db_query('SELECT * FROM {uc_field_attribute_options}
+    WHERE aid = :aid', array(':aid' => $aid));
   foreach ($result as $option) {
     $options[$option->oid] = $option;
   }
@@ -151,26 +152,25 @@ function uc_field_attribute_options_load($aid) {
  * Save attribute
  *
  * @param object $attribute
- *   By reference
  *
  * @return bool
  */
-function uc_field_attribute_save(&$attribute) {
+function uc_field_attribute_save($attribute) {
   // Insert or update?
   $key = empty($attribute->aid) ? array() : 'aid';
   return backdrop_write_record('uc_field_attribute_node', $attribute, $key);
 }
 
 /**
- * Load the attribute
+ * Load the field attribute
  *
  * @param int $nid
  * @param int $fiid
- *   Field isntance
+ *   Field instance
  */
 function uc_field_attribute_load($nid, $fiid) {
-  $aid = db_query("SELECT aid FROM {uc_field_attribute_node}
-    WHERE nid = :nid AND field_instance_id = :fid",
+  $aid = db_query('SELECT aid FROM {uc_field_attribute_node}
+    WHERE nid = :nid AND field_instance_id = :fid',
     array(':nid' => $nid, ':fid' => $fiid))->fetchField();
   if (!$aid) {
     return false;

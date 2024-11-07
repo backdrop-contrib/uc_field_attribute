@@ -71,21 +71,3 @@ function uc_field_attribute_schema() {
   );
   return $schema;
 }
-
-/**
- * Migrate uc_field_attribute variables to config.
- */
-function uc_field_attribute_update_1000() {
-  $config = config('uc_field_attribute.settings');
-  $node_names = node_type_get_names();
-  foreach ($node_names as $node_name) {
-    $old_variable = update_variable_get('uc_field_attribute_' . $node_name, NULL);
-    if ($old_variable == NULL) {
-      continue;
-    }
-    $config->set('uc_field_attribute_' . $node_name, $old_variable);
-    update_variable_del('uc_field_attribute_' . $node_name);
-  }
-
-  $config->save();
-}
