@@ -12,9 +12,9 @@
  */
 function uc_field_attribute_form($form, &$form_state, $object, $type, $view = 'overview') {
   $class = $object;
-  $id = $class->pcid;
+  $bundle = $class->pcid;
   if (empty($class->name)) {
-    backdrop_goto('admin/store/products/classes/' . $id);
+    backdrop_goto('admin/store/products/classes/' . $bundle);
   }
   backdrop_set_title($class->name);
 
@@ -26,7 +26,7 @@ function uc_field_attribute_form($form, &$form_state, $object, $type, $view = 'o
   );
 
   $form = array(
-    array('#markup' => t('Select the fields to make available as product attributes.'))
+    array('#markup' => t('<p>Select the fields to make available as product attributes. Not all fields work well as attributes. Typically the field should allow for multiple values.</p>'))
   );
 
   $form['#tree'] = TRUE;
@@ -36,7 +36,7 @@ function uc_field_attribute_form($form, &$form_state, $object, $type, $view = 'o
     $links = array(
       'edit' => array(
         'title' => t('Edit'),
-        'href' => 'admin/structure/types/manage/' . str_replace('_', '-', $id) . '/fields/' . $field_name,
+        'href' => 'admin/structure/types/manage/' . str_replace('_', '-', $bundle) . '/fields/' . $field_name,
       ),
     );
     $options[$field_name] = array(

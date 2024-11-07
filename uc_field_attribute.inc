@@ -63,7 +63,19 @@ function _uc_field_attribute_sync($node) {
       // This returns markup in an array.
       // Could probably make the $display configurable.
       $value = field_view_value('node', $node, $field_name, $item);
-      $value = strip_tags($value['#markup']);
+      switch (TRUE) {
+        case isset($value['#title']):
+          // Taxonomy title
+          $value = strip_tags($value['#title']);
+          break;
+        case isset($value['#label']):
+          // Entity Reference label
+          $value = strip_tags($value['#label']);
+          break;
+        case isset($value['#markup']):
+          $value = strip_tags($value['#markup']);
+          break;
+      }
       $product_attribute_oid = 0;
       foreach ($product_attribute->options as $oid => $option) {
         if ($option->name == $value) {
